@@ -97,7 +97,7 @@ int main(int argc, char * argv[]) {
             writeWord(rt,temp,false);
             printf("rt: %x\n",readWord(rt,0));
         }
-        if(func == 0x21){
+        if(funct == 0x22){
 	  uint32_t rs, rt, rd;
 	  rs = CurrentInstruction & 0x3E00000;
 	  rs = rs >> 21;
