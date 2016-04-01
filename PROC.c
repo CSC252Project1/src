@@ -97,6 +97,21 @@ int main(int argc, char * argv[]) {
             writeWord(rt,temp,false);
             printf("rt: %x\n",readWord(rt,0));
         }
+        if(func == 0x21){
+	  uint32_t rs, rt, rd;
+	  rs = CurrentInstruction & 0x3E00000;
+	  rs = rs >> 21;
+	  printf("rs: %04x\n",rs);
+	  rt = CurrentInstruction & 0xF8000;
+	  rt = rt >> 16;
+	  printf("rt: %04x\n",rt);
+	  rd = CurrentInstruction & 0xFC00;
+	  rd = rd >> 11;
+	  printf("rd: %04x\n",rd);
+	  temp = readWord(rs,0) - readWord(rt,0);
+	  printf("temp: %04x\n",temp);
+	  writeWord(rd, temp, 0);
+	}
         PC = PC + 4;
     } //end fori
     
