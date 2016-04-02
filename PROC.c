@@ -137,21 +137,6 @@ int main(int argc, char * argv[]) {
 
         if(funct == 0x22 && (op == 0)){/***sub - Jeter**/
             printf("SUB\n");
-<<<<<<< HEAD
-	        int32_t rs, rt, rd;
-	        rs = CurrentInstruction & 0x3E00000;
-	        rs = rs >> 21;
-	        printf("rs: %04x\n",rs);
-	        rt = CurrentInstruction & 0xF8000;
-	        rt = rt >> 16;
-	        printf("rt: %04x\n",rt);
-	        rd = CurrentInstruction & 0xFC00;
-	        rd = rd >> 11;
-	        printf("rd: %04x\n",rd);
-	        temp = readWord(rs,0) - readWord(rt,0);
-	        printf("temp: %04x\n",temp);
-	        writeWord(rd, temp, 0);
-=======
 	       int32_t rs, rt, rd;
 	       rs = CurrentInstruction & 0x3E00000;
 	       rs = rs >> 21;
@@ -165,12 +150,10 @@ int main(int argc, char * argv[]) {
 	       temp = readWord(rs,0) - readWord(rt,0);
 	       printf("temp: %04x\n",temp);
 	       writeWord(rd, temp, 0);
->>>>>>> origin/master
 	   }
 
        if(funct == 0x23 && (op == 0)){/***subu - Jeter**/
             printf("SUBU\n");
-<<<<<<< HEAD
             uint32_t rs, rt, rd;
             rs = CurrentInstruction & 0x3E00000;
             rs = rs >> 21;
@@ -259,23 +242,7 @@ int main(int argc, char * argv[]) {
             temp = readWord(rs,0) & readWord(rt,0);
             printf("temp: %04x\n",temp);
             writeWord(rt, temp, 0);
-=======
-           uint32_t rs, rt, rd;
-           rs = CurrentInstruction & 0x3E00000;
-           rs = rs >> 21;
-           printf("rs: %04x\n",rs);
-           rt = CurrentInstruction & 0xF8000;
-           rt = rt >> 16;
-           printf("rt: %04x\n",rt);
-           rd = CurrentInstruction & 0xFC00;
-           rd = rd >> 11;
-           printf("rd: %04x\n",rd);
-           temp = readWord(rs,0) - readWord(rt,0);
-           printf("temp: %04x\n",temp);
-           writeWord(rd, temp, 0);
->>>>>>> origin/master
-       }
-
+        }
        if(funct == 0x25 && (op == 0)){/***OR - Kingsley**/
             printf("OR\n");
            uint32_t rs, rt, rd;
