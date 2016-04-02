@@ -337,5 +337,44 @@ int main(int argc, char * argv[]) {
     CleanUp();
     return 1;
 }
-
+/*TO DO:
+* ssl
+* sslv
+* slti
+* sltiu
+* sltu
+* sra
+* srav
+* srl
+* srlv
+* beq
+* beql
+* bgez
+* bgezal
+* blez
+* blezl
+* bltz
+* bltzal
+* bne
+* bnel
+* j
+* jal
+* jalr
+* jr
+* lb
+* lbu
+* lh
+* lhu
+* lui
+* lw
+* lwl
+* lwr
+* sb
+* sh
+* sw
+* swl
+* swr
+* Syscall
+* nop
+*/
 
