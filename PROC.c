@@ -57,12 +57,12 @@ int main(int argc, char * argv[]) {
         CurrentInstruction = readWord(PC,false);
         /*CurrentInstruction = 0x410820;*/ 
         printf("CURRENT INSTRUCTION: %04x\n",CurrentInstruction); 
-        /*printRegFile();*/
     /********************************/
     //Add your implementation here
     /********************************/
         /******arith*******/
         int temp;
+        int32_t data1, data2;
         int funct = CurrentInstruction & 0x3F; /*masks off funct*/
         printf("funct: %x\n",funct);
         int op = CurrentInstruction & 0xFC000000; /*masks off funct*/
@@ -70,23 +70,25 @@ int main(int argc, char * argv[]) {
         printf("op: %x\n",op);
 
         if ((funct == 0x20) && (op == 0)){/***add - Kingsley***/
-            printf("ADD");
+            printf("ADD\n");
             int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
             rs = rs >> 21;
-            printf("rs: %04x\n",readWord(rs,0));
+            data1 = readWord(rs, 0);
+            printf("rs %i: %i\n",rs, data1);
             int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
             rt = rt >> 16;
-            printf("rt: %04x\n",readWord(rs,0));
+            data2 = readWord(rt, 0);
+            printf("rt %i: %i\n",rt, data2);
             int32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
             rd = rd >> 11;
-            temp = readWord(rs,0) + readWord(rt,0);
-            printf("temp: %04x\n",temp);
-            writeWord(rd,temp,false);
-            printf("rd: %04x\n",readWord(rd,0));
+            temp = data1 + data2;
+            printf("temp: %i\n",temp);
+            writeWord(rd,temp,0);
+            printf("rd %i: %i\n",rd,readWord(rd,0));
         }
 
         if (op == 0x8){/***addi - Kingsley***/
-            printf("ADDI");
+            printf("ADDI\n");
             int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
             rs = rs >> 21;
             printf("rs: %04x\n",readWord(rs,0));
@@ -102,7 +104,7 @@ int main(int argc, char * argv[]) {
         }
 
         if (op == 0x9){/***addiu - Kingsley***/
-            printf("ADDIU");
+            printf("ADDIU\n");
             uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
             rs = rs >> 21;
             printf("rs: %04x\n",readWord(rs,0));
@@ -118,7 +120,7 @@ int main(int argc, char * argv[]) {
         }
 
         if ((funct == 0x21) && (op == 0)){/***addu - Kingsley***/
-            printf("ADDU");
+            printf("ADDU\n");
             uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
             rs = rs >> 21;
             printf("rs: %04x\n",readWord(rs,0));
@@ -134,7 +136,7 @@ int main(int argc, char * argv[]) {
         }
 
         if(funct == 0x22 && (op == 0)){/***sub - Jeter**/
-            printf("SUB");
+            printf("SUB\n");
 	       int32_t rs, rt, rd;
 	       rs = CurrentInstruction & 0x3E00000;
 	       rs = rs >> 21;
@@ -151,7 +153,7 @@ int main(int argc, char * argv[]) {
 	   }
 
        if(funct == 0x23 && (op == 0)){/***subu - Jeter**/
-            printf("SUB");
+            printf("SUBU\n");
            uint32_t rs, rt, rd;
            rs = CurrentInstruction & 0x3E00000;
            rs = rs >> 21;
@@ -166,6 +168,92 @@ int main(int argc, char * argv[]) {
            printf("temp: %04x\n",temp);
            writeWord(rd, temp, 0);
        }
+
+       if(funct == 0x25 && (op == 0)){/***OR - Kingsley**/
+            printf("OR\n");
+           uint32_t rs, rt, rd;
+           rs = CurrentInstruction & 0x3E00000;
+           rs = rs >> 21;
+           printf("rs: %04x\n",rs);
+           rt = CurrentInstruction & 0xF8000;
+           rt = rt >> 16;
+           printf("rt: %04x\n",rt);
+           rd = CurrentInstruction & 0xFC00;
+           rd = rd >> 11;
+           printf("rd: %04x\n",rd);
+           temp = readWord(rs,0) | readWord(rt,0);
+           printf("temp: %04x\n",temp);
+           writeWord(rd, temp, 0);
+       }
+
+       if (op == 0xD){/***ORI - Kingsley***/
+            printf("ORI\n");
+            int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+            rs = rs >> 21;
+            printf("rs: %04x\n",readWord(rs,0));
+            int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+            rt = rt >> 16;
+            printf("rt: %04x\n",readWord(rs,0));
+            int32_t immediate = CurrentInstruction & 0xFFFF;
+            printf("immediate: %04x\n",immediate);
+            temp = readWord(rs,0) | immediate;
+            printf("temp: %04x\n",temp);
+            writeWord(rt,temp,false);
+            printf("rt: %04x\n",readWord(rt,0));
+        }
+
+         if(funct == 0x27 && (op == 0)){/***NOR - Kingsley**/
+            printf("NOR\n");
+           uint32_t rs, rt, rd;
+           rs = CurrentInstruction & 0x3E00000;
+           rs = rs >> 21;
+           printf("rs: %04x\n",rs);
+           rt = CurrentInstruction & 0xF8000;
+           rt = rt >> 16;
+           printf("rt: %04x\n",rt);
+           rd = CurrentInstruction & 0xFC00;
+           rd = rd >> 11;
+           printf("rd: %04x\n",rd);
+           temp = readWord(rs,0) | readWord(rt,0);
+           temp = ~temp;
+           printf("temp: %04x\n",temp);
+           writeWord(rd, temp, 0);
+       }
+
+       if(funct == 0x26 && (op == 0)){/***XOR - Kingsley**/
+            printf("XOR\n");
+           uint32_t rs, rt, rd;
+           rs = CurrentInstruction & 0x3E00000;
+           rs = rs >> 21;
+           printf("rs: %04x\n",rs);
+           rt = CurrentInstruction & 0xF8000;
+           rt = rt >> 16;
+           printf("rt: %04x\n",rt);
+           rd = CurrentInstruction & 0xFC00;
+           rd = rd >> 11;
+           printf("rd: %04x\n",rd);
+           temp = readWord(rs,0) ^ readWord(rt,0);
+           printf("temp: %04x\n",temp);
+           writeWord(rd, temp, 0);
+       }
+
+       if (op == 0xE){/***XORI - Kingsley***/
+            printf("XORI\n");
+            int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+            rs = rs >> 21;
+            printf("rs: %04x\n",readWord(rs,0));
+            int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+            rt = rt >> 16;
+            printf("rt: %04x\n",readWord(rs,0));
+            int32_t immediate = CurrentInstruction & 0xFFFF;
+            printf("immediate: %04x\n",immediate);
+            temp = readWord(rs,0) ^ immediate;
+            printf("temp: %04x\n",temp);
+            writeWord(rt,temp,false);
+            printf("rt: %04x\n",readWord(rt,0));
+        }
+
+        /*printRegFile();*/m
         PC = PC + 4;
     } //end fori
     
