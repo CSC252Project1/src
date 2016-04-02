@@ -70,7 +70,7 @@ int main(int argc, char * argv[]) {
         printf("op: %x\n",op);
 
         if ((funct == 0x20) && (op == 0)){/***add - Kingsley***/
-            printf("ADD");
+            printf("ADD\n");
             int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
             rs = rs >> 21;
             printf("rs: %04x\n",readWord(rs,0));
@@ -86,7 +86,7 @@ int main(int argc, char * argv[]) {
         }
 
         if (op == 0x8){/***addi - Kingsley***/
-            printf("ADDI");
+            printf("ADDI\n");
             int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
             rs = rs >> 21;
             printf("rs: %04x\n",readWord(rs,0));
@@ -102,7 +102,7 @@ int main(int argc, char * argv[]) {
         }
 
         if (op == 0x9){/***addiu - Kingsley***/
-            printf("ADDIU");
+            printf("ADDIU\n");
             uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
             rs = rs >> 21;
             printf("rs: %04x\n",readWord(rs,0));
@@ -118,7 +118,7 @@ int main(int argc, char * argv[]) {
         }
 
         if ((funct == 0x21) && (op == 0)){/***addu - Kingsley***/
-            printf("ADDU");
+            printf("ADDU\n");
             uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
             rs = rs >> 21;
             printf("rs: %04x\n",readWord(rs,0));
@@ -134,37 +134,112 @@ int main(int argc, char * argv[]) {
         }
 
         if(funct == 0x22 && (op == 0)){/***sub - Jeter**/
-            printf("SUB");
-	       int32_t rs, rt, rd;
-	       rs = CurrentInstruction & 0x3E00000;
-	       rs = rs >> 21;
-	       printf("rs: %04x\n",rs);
-	       rt = CurrentInstruction & 0xF8000;
-	       rt = rt >> 16;
-	       printf("rt: %04x\n",rt);
-	       rd = CurrentInstruction & 0xFC00;
-	       rd = rd >> 11;
-	       printf("rd: %04x\n",rd);
-	       temp = readWord(rs,0) - readWord(rt,0);
-	       printf("temp: %04x\n",temp);
-	       writeWord(rd, temp, 0);
+            printf("SUB\n");
+	        int32_t rs, rt, rd;
+	        rs = CurrentInstruction & 0x3E00000;
+	        rs = rs >> 21;
+	        printf("rs: %04x\n",rs);
+	        rt = CurrentInstruction & 0xF8000;
+	        rt = rt >> 16;
+	        printf("rt: %04x\n",rt);
+	        rd = CurrentInstruction & 0xFC00;
+	        rd = rd >> 11;
+	        printf("rd: %04x\n",rd);
+	        temp = readWord(rs,0) - readWord(rt,0);
+	        printf("temp: %04x\n",temp);
+	        writeWord(rd, temp, 0);
 	   }
 
        if(funct == 0x23 && (op == 0)){/***subu - Jeter**/
-            printf("SUB");
-           uint32_t rs, rt, rd;
-           rs = CurrentInstruction & 0x3E00000;
-           rs = rs >> 21;
-           printf("rs: %04x\n",rs);
-           rt = CurrentInstruction & 0xF8000;
-           rt = rt >> 16;
-           printf("rt: %04x\n",rt);
-           rd = CurrentInstruction & 0xFC00;
-           rd = rd >> 11;
-           printf("rd: %04x\n",rd);
-           temp = readWord(rs,0) - readWord(rt,0);
-           printf("temp: %04x\n",temp);
-           writeWord(rd, temp, 0);
+            printf("SUBU\n");
+            uint32_t rs, rt, rd;
+            rs = CurrentInstruction & 0x3E00000;
+            rs = rs >> 21;
+            printf("rs: %04x\n",rs);
+            rt = CurrentInstruction & 0xF8000;
+            rt = rt >> 16;
+            printf("rt: %04x\n",rt);
+            rd = CurrentInstruction & 0xFC00;
+            rd = rd >> 11;
+            printf("rd: %04x\n",rd);
+            temp = readWord(rs,0) - readWord(rt,0);
+            printf("temp: %04x\n",temp);
+            writeWord(rd, temp, 0);
+       }
+       if(funct == 0x1A && (op == 0)){/***div - Jeter**/
+            printf("DIV\n");
+            int32_t rs, rt, quoitent, remainder;
+            rs = CurrentInstruction & 0x3E00000;
+            rs = rs >> 21;
+            printf("rs: %04x\n",rs);
+            rt = CurrentInstruction & 0xF8000;
+            rt = rt >> 16;
+            printf("rt: %04x\n",rt);
+            if(rt != 0){
+                quoitent= readWord(rs,0) / readWord(rt,0);
+                remainder = readWord(rs, 0) % readWord(rt, 0);
+                }
+            else
+                quoitent = NULL; /*cannot divide by 0*/
+                printf("Cannot divide by 0\n");
+            }
+            printf("quoitent: %04x\n",quoitent);
+            printf("remainder: %04x\n",remainder );
+            writeWord(LO, quoitent, 0); /*Write to LO (probably not right syntax)*/
+            writeWord(HI, remainder, 0); /*Write to HI (probably not right syntax)*/
+       }
+       if(funct == 0x1B && (op == 0)){/***divu - Jeter**/
+            printf("DIVU\n");
+            uint32_t rs, rt, quoitent, remainder;
+            rs = CurrentInstruction & 0x3E00000;
+            rs = rs >> 21;
+            printf("rs: %04x\n",rs);
+            rt = CurrentInstruction & 0xF8000;
+            rt = rt >> 16;
+            printf("rt: %04x\n",rt);
+            if(rt != 0){
+                quoitent= readWord(rs,0) / readWord(rt,0);
+                remainder = readWord(rs, 0) % readWord(rt, 0);
+                }
+            else
+                quoitent = NULL; /*cannot divide by 0*/
+                printf("Cannot divide by 0\n");
+            }
+            printf("quoitent: %04x\n",quoitent);
+            printf("remainder: %04x\n",remainder );
+            writeWord(LO, quoitent, 0); /*Write to LO (probably not right syntax)*/
+            writeWord(HI, remainder, 0); /*Write to HI (probably not right syntax)*/
+       }
+       if(funct == 0x24 && (op == 0)){/***and - Jeter**/
+            printf("AND\n");
+            int32_t rs, rt, rd;
+            rs = CurrentInstruction & 0x3E00000;
+            rs = rs >> 21;
+            printf("rs: %04x\n",rs);
+            rt = CurrentInstruction & 0xF8000;
+            rt = rt >> 16;
+            printf("rt: %04x\n",rt);
+            rd = CurrentInstruction & 0xFC00;
+            rd = rd >> 11;
+            printf("rd: %04x\n",rd);
+            temp = readWord(rs,0) & readWord(rt,0);
+            printf("temp: %04x\n",temp);
+            writeWord(rd, temp, 0);
+       }
+       if(funct == 0x24 && (op == 0)){/***andi - Jeter**/
+            printf("ANDI\n");
+            int32_t rs, rt, immediate;
+            rs = CurrentInstruction & 0x3E00000;
+            rs = rs >> 21;
+            printf("rs: %04x\n",rs);
+            rt = CurrentInstruction & 0xF8000;
+            rt = rt >> 16;
+            printf("rt: %04x\n",rt);
+            immediate = CurrentInstruction & 0xFFFF;
+            printf("immediate: %04x\n",immediate);
+            temp = readWord(rs,0) & readWord(rt,0);
+            printf("temp: %04x\n",temp);
+            writeWord(rt, temp, 0);
        }
         PC = PC + 4;
     } //end fori
