@@ -69,312 +69,278 @@ int main(int argc, char * argv[]) {
         op = op >> 26;
         printf("op: %x\n",op);
 
-        if ((funct == 0x20) && (op == 0)){/***add - Kingsley***/
-            printf("ADD\n");
-            int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
-            rs = rs >> 21;
-            data1 = readWord(rs, 0);
-            printf("rs %i: %i\n",rs, data1);
-            int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
-            rt = rt >> 16;
-            data2 = readWord(rt, 0);
-            printf("rt %i: %i\n",rt, data2);
-            int32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
-            rd = rd >> 11;
-            temp = data1 + data2;
-            printf("temp: %i\n",temp);
-            writeWord(rd,temp,0);
-            printf("rd %i: %i\n",rd,readWord(rd,0));
-        }
+        switch(op){
 
-        if (op == 0x8){/***addi - Kingsley***/
-            printf("ADDI\n");
-            int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
-            rs = rs >> 21;
-            printf("rs: %04x\n",readWord(rs,0));
-            int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
-            rt = rt >> 16;
-            printf("rt: %04x\n",readWord(rs,0));
-            int32_t immediate = CurrentInstruction & 0xFFFF;
-            printf("immediate: %04x\n",immediate);
-            temp = readWord(rs,0) + immediate;
-            printf("temp: %04x\n",temp);
-            writeWord(rt,temp,false);
-            printf("rt: %04x\n",readWord(rt,0));
-        }
+          case 0:
+            switch(funct){
+              case 0x20:/***add- Kingsley***/
+                  printf("ADD\n");
+                  int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  int32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  temp = data1 + data2;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
 
-        if (op == 0x9){/***addiu - Kingsley***/
-            printf("ADDIU\n");
-            uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
-            rs = rs >> 21;
-            printf("rs: %04x\n",readWord(rs,0));
-            uint32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
-            rt = rt >> 16;
-            printf("rt: %04x\n",readWord(rs,0));
-            uint32_t immediate = CurrentInstruction & 0xFFFF;
-            printf("immediate: %04x\n",immediate);
-            temp = readWord(rs,0) + immediate;
-            printf("temp: %04x\n",temp);
-            writeWord(rt,temp,false);
-            printf("rt: %04x\n",readWord(rt,0));
-        }
+              case 0x21:/***addu - Kingsley***/
+                  printf("ADDU\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  temp = data1 + data2;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
 
-        if ((funct == 0x21) && (op == 0)){/***addu - Kingsley***/
-            printf("ADDU\n");
-            uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
-            rs = rs >> 21;
-            printf("rs: %04x\n",readWord(rs,0));
-            uint32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
-            rt = rt >> 16;
-            printf("rt: %04x\n",readWord(rs,0));
-            uint32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
-            rd = rd >> 11;
-            temp = readWord(rs,0) + readWord(rt,0);
-            printf("temp: %04x\n",temp);
-            writeWord(rd,temp,false);
-            printf("rd: %04x\n",readWord(rd,0));
-        }
+              case 0x22:/***sub- Jeter***/
+                  printf("SUB\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  temp = data1 - data2;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
 
-        if(funct == 0x22 && (op == 0)){/***sub - Jeter**/
-            printf("SUB\n");
-	       int32_t rs, rt, rd;
-	       rs = CurrentInstruction & 0x3E00000;
-	       rs = rs >> 21;
-	       printf("rs: %04x\n",rs);
-	       rt = CurrentInstruction & 0xF8000;
-	       rt = rt >> 16;
-	       printf("rt: %04x\n",rt);
-	       rd = CurrentInstruction & 0xFC00;
-	       rd = rd >> 11;
-	       printf("rd: %04x\n",rd);
-	       temp = readWord(rs,0) - readWord(rt,0);
-	       printf("temp: %04x\n",temp);
-	       writeWord(rd, temp, 0);
-	   }
-
-       if(funct == 0x23 && (op == 0)){/***subu - Jeter**/
-            printf("SUBU\n");
-            uint32_t rs, rt, rd;
-            rs = CurrentInstruction & 0x3E00000;
-            rs = rs >> 21;
-            printf("rs: %04x\n",rs);
-            rt = CurrentInstruction & 0xF8000;
-            rt = rt >> 16;
-            printf("rt: %04x\n",rt);
-            rd = CurrentInstruction & 0xFC00;
-            rd = rd >> 11;
-            printf("rd: %04x\n",rd);
-            temp = readWord(rs,0) - readWord(rt,0);
-            printf("temp: %04x\n",temp);
-            writeWord(rd, temp, 0);
-       }
-       if(funct == 0x1A && (op == 0)){/***div - Jeter**/
-            printf("DIV\n");
-            int32_t rs, rt, quoitent, remainder;
-            rs = CurrentInstruction & 0x3E00000;
-            rs = rs >> 21;
-            printf("rs: %04x\n",rs);
-            rt = CurrentInstruction & 0xF8000;
-            rt = rt >> 16;
-            printf("rt: %04x\n",rt);
-            if(rt != 0){
-                quoitent= readWord(rs,0) / readWord(rt,0);
-                remainder = readWord(rs, 0) % readWord(rt, 0);
-                }
-            else
-                quoitent = NULL; /*cannot divide by 0*/
-                printf("Cannot divide by 0\n");
+              case 0x23:/***subu - Jeter***/
+                  printf("SUBU\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  temp = data1 - data2;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
+              
+              /*mult*/
+              case 0x18:/***mult - Kingsley***/
+                  printf("MULT\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  int64_t product = rs*rt;
+                  RegFile[33] = product & 0xFFFFFFFF;
+                  RegFile[32] = product & 0xFFFFFFFF00000000;
+                  printf("product: %i and in hex %x\n",product,product);
+              break;
+              /*multu*/
+              /*mfhi*/
+              /*mflo*/
+              case 0x12:/*mflo - Kingsley*/
+                  printf("MFLO\n");
+                  rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  RegFile[rd] = RegFile[33];
+                  printf("rd %i: %i\n",rd, RegFile[rd]);
+              break;
+              /*mthi*/
+              /*mtlo*/
+              /*and*/
+              /*xor*/
+              case 0x26:
+                   printf("XOR\n");
+                   rs = CurrentInstruction & 0x3E00000;
+                   rs = rs >> 21;
+                   printf("rs %i: %x\n",rs, RegFile[rs]);
+                   rt = CurrentInstruction & 0xF8000;
+                   rt = rt >> 16;
+                   printf("rt %i: %x\n",rt, RegFile[rt]);
+                   rd = CurrentInstruction & 0xFC00;
+                   rd = rd >> 11;
+                   temp = RegFile[rs] ^ RegFile[rt];
+                   printf("temp: %04x\n",temp);
+                   RegFile[rd] = temp;
+                   printf("rd %i: %x\n",rd, RegFile[rd]);
+              break;
+              /*nor*/
+              case 0x27:
+                   printf("NOR\n");
+                   rs = CurrentInstruction & 0x3E00000;
+                   rs = rs >> 21;
+                   printf("rs %i: %i\n",rs, RegFile[rs]);
+                   rt = CurrentInstruction & 0xF8000;
+                   rt = rt >> 16;
+                   printf("rt %i: %i\n",rt, RegFile[rt]);
+                   rd = CurrentInstruction & 0xFC00;
+                   rd = rd >> 11;
+                   printf("rs %i: %i\n",rd, RegFile[rd]);
+                   temp = RegFile[rs] | RegFile[rt];
+                   temp = ~temp;
+                   printf("temp: %04x\n",temp);
+                   RegFile[rd] = temp;
+              break;
+              /*or*/
+              case 0x25:
+                   printf("OR\n");
+                   rs = CurrentInstruction & 0x3E00000;
+                   rs = rs >> 21;
+                   printf("rs %i: %i\n",rs, RegFile[rs]);
+                   rt = CurrentInstruction & 0xF8000;
+                   rt = rt >> 16;
+                   printf("rt %i: %i\n",rt, RegFile[rt]);
+                   rd = CurrentInstruction & 0xFC00;
+                   rd = rd >> 11;
+                   printf("rs %i: %i\n",rd, RegFile[rd]);
+                   temp = RegFile[rs] | RegFile[rt];
+                   printf("temp: %04x\n",temp);
+                   RegFile[rd] = temp;
+              break;
+              /*sll*/
+              /*sllv*/
+              /*slt*/
+              /*
+              *sltu
+              *sra
+              *srav
+              *srl
+              *srlv
+              *jalr
+              *jr
+              *NOP
+              */
             }
-            printf("quoitent: %04x\n",quoitent);
-            printf("remainder: %04x\n",remainder );
-            writeWord(LO, quoitent, 0); /*Write to LO (probably not right syntax)*/
-            writeWord(HI, remainder, 0); /*Write to HI (probably not right syntax)*/
-       }
-       if(funct == 0x1B && (op == 0)){/***divu - Jeter**/
-            printf("DIVU\n");
-            uint32_t rs, rt, quoitent, remainder;
-            rs = CurrentInstruction & 0x3E00000;
-            rs = rs >> 21;
-            printf("rs: %04x\n",rs);
-            rt = CurrentInstruction & 0xF8000;
-            rt = rt >> 16;
-            printf("rt: %04x\n",rt);
-            if(rt != 0){
-                quoitent= readWord(rs,0) / readWord(rt,0);
-                remainder = readWord(rs, 0) % readWord(rt, 0);
-                }
-            else
-                quoitent = NULL; /*cannot divide by 0*/
-                printf("Cannot divide by 0\n");
-            }
-            printf("quoitent: %04x\n",quoitent);
-            printf("remainder: %04x\n",remainder );
-            writeWord(LO, quoitent, 0); /*Write to LO (probably not right syntax)*/
-            writeWord(HI, remainder, 0); /*Write to HI (probably not right syntax)*/
-       }
-       if(funct == 0x24 && (op == 0)){/***and - Jeter**/
-            printf("AND\n");
-            int32_t rs, rt, rd;
-            rs = CurrentInstruction & 0x3E00000;
-            rs = rs >> 21;
-            printf("rs: %04x\n",rs);
-            rt = CurrentInstruction & 0xF8000;
-            rt = rt >> 16;
-            printf("rt: %04x\n",rt);
-            rd = CurrentInstruction & 0xFC00;
-            rd = rd >> 11;
-            printf("rd: %04x\n",rd);
-            temp = readWord(rs,0) & readWord(rt,0);
-            printf("temp: %04x\n",temp);
-            writeWord(rd, temp, 0);
-       }
-       if(funct == 0x24 && (op == 0)){/***andi - Jeter**/
-            printf("ANDI\n");
-            int32_t rs, rt, immediate;
-            rs = CurrentInstruction & 0x3E00000;
-            rs = rs >> 21;
-            printf("rs: %04x\n",rs);
-            rt = CurrentInstruction & 0xF8000;
-            rt = rt >> 16;
-            printf("rt: %04x\n",rt);
-            immediate = CurrentInstruction & 0xFFFF;
-            printf("immediate: %04x\n",immediate);
-            temp = readWord(rs,0) & readWord(rt,0);
-            printf("temp: %04x\n",temp);
-            writeWord(rt, temp, 0);
-        }
-       if(funct == 0x25 && (op == 0)){/***OR - Kingsley**/
-            printf("OR\n");
-           uint32_t rs, rt, rd;
-           rs = CurrentInstruction & 0x3E00000;
-           rs = rs >> 21;
-           printf("rs: %04x\n",rs);
-           rt = CurrentInstruction & 0xF8000;
-           rt = rt >> 16;
-           printf("rt: %04x\n",rt);
-           rd = CurrentInstruction & 0xFC00;
-           rd = rd >> 11;
-           printf("rd: %04x\n",rd);
-           temp = readWord(rs,0) | readWord(rt,0);
-           printf("temp: %04x\n",temp);
-           writeWord(rd, temp, 0);
-       }
+          break; /*op 0*/
 
-       if (op == 0xD){/***ORI - Kingsley***/
-            printf("ORI\n");
-            int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
-            rs = rs >> 21;
-            printf("rs: %04x\n",readWord(rs,0));
-            int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
-            rt = rt >> 16;
-            printf("rt: %04x\n",readWord(rs,0));
-            int32_t immediate = CurrentInstruction & 0xFFFF;
-            printf("immediate: %04x\n",immediate);
-            temp = readWord(rs,0) | immediate;
-            printf("temp: %04x\n",temp);
-            writeWord(rt,temp,false);
-            printf("rt: %04x\n",readWord(rt,0));
-        }
+          case 0x8:/*addi Kingsley*/
+              printf("ADDI\n");
+              int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs: %04x\n",rs);
+              int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt: %04x\n",rt);
+              int32_t immediate = CurrentInstruction & 0xFFFF;
+              printf("immediate: %04x\n",immediate);
+              temp = RegFile[rs] + immediate;
+              printf("temp: %04x\n",temp);
+              RegFile[rt] = temp;
+              printf("rt: %04x\n",RegFile[rt]);
+          break;
 
-         if(funct == 0x27 && (op == 0)){/***NOR - Kingsley**/
-            printf("NOR\n");
-           uint32_t rs, rt, rd;
-           rs = CurrentInstruction & 0x3E00000;
-           rs = rs >> 21;
-           printf("rs: %04x\n",rs);
-           rt = CurrentInstruction & 0xF8000;
-           rt = rt >> 16;
-           printf("rt: %04x\n",rt);
-           rd = CurrentInstruction & 0xFC00;
-           rd = rd >> 11;
-           printf("rd: %04x\n",rd);
-           temp = readWord(rs,0) | readWord(rt,0);
-           temp = ~temp;
-           printf("temp: %04x\n",temp);
-           writeWord(rd, temp, 0);
-       }
+          case 0x9:/*addiu - Kingsley*/
+              printf("ADDIU\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs: %04x\n",rs);
+              rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt: %04x\n",rt);
+              immediate = CurrentInstruction & 0xFFFF;
+              printf("immediate: %04x\n",immediate);
+              temp = RegFile[rs] + immediate;
+              printf("temp: %04x\n",temp);
+              RegFile[rt] = temp;
+              printf("rt: %04x\n",RegFile[rt]);
+          break;
 
-       if(funct == 0x26 && (op == 0)){/***XOR - Kingsley**/
-            printf("XOR\n");
-           uint32_t rs, rt, rd;
-           rs = CurrentInstruction & 0x3E00000;
-           rs = rs >> 21;
-           printf("rs: %04x\n",rs);
-           rt = CurrentInstruction & 0xF8000;
-           rt = rt >> 16;
-           printf("rt: %04x\n",rt);
-           rd = CurrentInstruction & 0xFC00;
-           rd = rd >> 11;
-           printf("rd: %04x\n",rd);
-           temp = readWord(rs,0) ^ readWord(rt,0);
-           printf("temp: %04x\n",temp);
-           writeWord(rd, temp, 0);
-       }
+          case 0xD:/*ori - Kingsley*/
+              printf("ORI\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs: %04x\n",rs);
+              rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt: %04x\n",rt);
+              immediate = CurrentInstruction & 0xFFFF;
+              printf("immediate: %04x\n",immediate);
+              temp = RegFile[rs] | immediate;
+              printf("temp: %04x\n",temp);
+              RegFile[rt] = temp;
+              printf("rt: %04x\n",RegFile[rt]);
+          break;
 
-       if (op == 0xE){/***XORI - Kingsley***/
-            printf("XORI\n");
-            int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
-            rs = rs >> 21;
-            printf("rs: %04x\n",readWord(rs,0));
-            int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
-            rt = rt >> 16;
-            printf("rt: %04x\n",readWord(rs,0));
-            int32_t immediate = CurrentInstruction & 0xFFFF;
-            printf("immediate: %04x\n",immediate);
-            temp = readWord(rs,0) ^ immediate;
-            printf("temp: %04x\n",temp);
-            writeWord(rt,temp,false);
-            printf("rt: %04x\n",readWord(rt,0));
-        }
+          case 0xE:/*xori - Kingsley*/
+              printf("XORI\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs: %04x\n",rs);
+              rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt: %04x\n",rt);
+              immediate = CurrentInstruction & 0xFFFF;
+              printf("immediate: %04x\n",immediate);
+              temp = RegFile[rs] ^ immediate;
+              printf("temp: %04x\n",temp);
+              RegFile[rt] = temp;
+              printf("rt: %04x\n",RegFile[rt]);
+          break;
 
-        /*printRegFile();*/m
-        PC = PC + 4;
-    } //end fori
-    
-    
-    //Close file pointers & free allocated Memory
-    closeFDT();
-    CleanUp();
-    return 1;
+        /*TO DO:
+          * andi
+          * xori
+          * slti
+          * sltiu
+          beq
+          beql
+          bgez
+          bgezal
+          bgtz
+          blez
+          blezl
+          bltz
+          bltzal
+          bne
+          bnel
+          j
+          jal
+          LB
+          LBU
+          LH
+          LHU
+          LUI
+          LW
+          LWL
+          LWR
+          SB
+          SH
+          SW
+          SWL
+          SWR
+          */
+      }
+      /*syscall*/
+    printRegFile();
+    PC = PC + 4;
+
+    }
 }
-/*TO DO:
-* ssl
-* sslv
-* slti
-* sltiu
-* sltu
-* sra
-* srav
-* srl
-* srlv
-* beq
-* beql
-* bgez
-* bgezal
-* blez
-* blezl
-* bltz
-* bltzal
-* bne
-* bnel
-* j
-* jal
-* jalr
-* jr
-* lb
-* lbu
-* lh
-* lhu
-* lui
-* lw
-* lwl
-* lwr
-* sb
-* sh
-* sw
-* swl
-* swr
-* Syscall
-* nop
-*/
+
 
