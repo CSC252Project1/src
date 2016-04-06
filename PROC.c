@@ -161,8 +161,80 @@ int main(int argc, char * argv[]) {
                   RegFile[32] = product & 0xFFFFFFFF00000000;
                   printf("product: %i and in hex %x\n",product,product);
               break;
+
               /*multu*/
+              case 0x19:/***multu - Kingsley***/
+                  printf("MULTU\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  uint64_t product = rs*rt;
+                  RegFile[33] = product & 0xFFFFFFFF;
+                  RegFile[32] = product & 0xFFFFFFFF00000000;
+                  printf("product: %i and in hex %x\n",product,product);
+              break;
+
+              case 0x1A:/***div - Jeter**/
+                  printf("DIV\n");
+                  int32_t rem;
+                  int32_t quoitent;
+                  rs = CurrentInstruction & 0x3E00000;
+                  rs = rs >> 21;
+                  printf("rs: %04x\n",rs);
+                  rt = CurrentInstruction & 0xF8000;
+                  rt = rt >> 16;
+                  printf("rt: %04x\n",rt);
+                  if(rt != 0){
+                      quoitent= RegFile[rs] / RegFile[rt];
+                      rem = RegFile[rs] % RegFile[rt];
+                      }
+                  else
+                      quoitent = NULL; /*cannot divide by 0*/
+                      rem = 0;
+                      printf("Cannot divide by 0\n");
+                  }
+                  printf("quoitent: %04x\n",quoitent);
+                  printf("remainder: %04x\n",rem );
+                  RegFile[34] = quoitent; /*Write to LO*/
+                  RegFile[33] = rem; /*Write to HI*/
+              break;
+
+              case 0x1B:/***divu - Jeter**/
+                  printf("DIVU\n");
+                  rs = CurrentInstruction & 0x3E00000;
+                  rs = rs >> 21;
+                  printf("rs: %04x\n",rs);
+                  rt = CurrentInstruction & 0xF8000;
+                  rt = rt >> 16;
+                  printf("rt: %04x\n",rt);
+                  if(rt != 0){
+                      quoitent= RegFile[rs] / RegFile[rt];
+                      rem = RegFile[rs] % RegFile[rt];
+                      }
+                  else
+                      quoitent = NULL; /*cannot divide by 0*/
+                      printf("Cannot divide by 0\n");
+                  }
+                  printf("quoitent: %04x\n",quoitent);
+                  printf("remainder: %04x\n",rem);
+                  RegFile[34] = quoitent; /*Write to LO*/
+                  RegFile[33] = rem; /*Write to HI*/
+              break;
+
               /*mfhi*/
+              case 0x10:/*mfhi - Kingsley*/
+                  printf("MFHI\n");
+                  rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  RegFile[rd] = RegFile[34];
+                  printf("rd %i: %i\n",rd, RegFile[rd]);
+              break;
+
               /*mflo*/
               case 0x12:/*mflo - Kingsley*/
                   printf("MFLO\n");
@@ -171,9 +243,42 @@ int main(int argc, char * argv[]) {
                   RegFile[rd] = RegFile[33];
                   printf("rd %i: %i\n",rd, RegFile[rd]);
               break;
+
               /*mthi*/
+              case 0x11: /*mthi - Jeter*/
+                  printf("MTHI\n");
+                  rs = CurrentInstruction & 0x3E00000;
+                  rs = rs >> 21;
+                  RegFile[34] = RegFile[rs];
+                  printf("rs %i: %i\n",rs, RegFile[34]);
+              break;
+
               /*mtlo*/
+              case 0x13: /*mtlo - Jeter*/
+                  printf("MTLO\n");
+                  rs = CurrentInstruction & 0x3E00000;
+                  rs = rs >> 21;
+                  RegFile[33] = RegFile[rs];
+                  printf("rs %i: %i\n",rs, RegFile[33]);
+              break;
+
               /*and*/
+              case 0x26:
+                   printf("AND\n");
+                   rs = CurrentInstruction & 0x3E00000;
+                   rs = rs >> 21;
+                   printf("rs %i: %x\n",rs, RegFile[rs]);
+                   rt = CurrentInstruction & 0xF8000;
+                   rt = rt >> 16;
+                   printf("rt %i: %x\n",rt, RegFile[rt]);
+                   rd = CurrentInstruction & 0xFC00;
+                   rd = rd >> 11;
+                   temp = RegFile[rs] & RegFile[rt];
+                   printf("temp: %04x\n",temp);
+                   RegFile[rd] = temp;
+                   printf("rd %i: %x\n",rd, RegFile[rd]);
+              break;
+
               /*xor*/
               case 0x26:
                    printf("XOR\n");
@@ -190,6 +295,7 @@ int main(int argc, char * argv[]) {
                    RegFile[rd] = temp;
                    printf("rd %i: %x\n",rd, RegFile[rd]);
               break;
+
               /*nor*/
               case 0x27:
                    printf("NOR\n");
@@ -207,6 +313,7 @@ int main(int argc, char * argv[]) {
                    printf("temp: %04x\n",temp);
                    RegFile[rd] = temp;
               break;
+
               /*or*/
               case 0x25:
                    printf("OR\n");
@@ -223,18 +330,165 @@ int main(int argc, char * argv[]) {
                    printf("temp: %04x\n",temp);
                    RegFile[rd] = temp;
               break;
-              /*sll*/
+
+              /*sll / NOP */
+              case 0x0: /*sll/nop - Jeter*/
+                  printf("SLL\n");
+                  uint32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data1 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  uint32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  uint32_t sa = CurrentInstruction & 0x7C0; /*masks off sa*/
+                  data2 = RegFile[sa];
+                  if(rt == 0 && rd == 0 && sa == 0){
+                    printf("NOP\n");
+                    break;
+                  }
+                  else{
+                    temp = data1 << data2;
+                    printf("temp: %i\n",temp);
+                    RegFile[rd] = temp;
+                    printf("rd %i: %i\n",rd,RegFile[rd]);
+                    break;
+                  }
+
               /*sllv*/
+              case 0x4: /*sllv - Jeter*/
+                  printf("SLLV\n");
+                  uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  uint32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  uint32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  temp = data2 << data1;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
+
               /*slt*/
+              case 0x2A: /*slt - Jeter*/
+                  printf("SLT\n");
+                  int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  int32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  if(RegFile[rs] < RegFile[rt])
+                    temp = 1;
+                  else
+                    temp = 0;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
+              
+              case 0x2B: /*sltu - Jeter*/
+                  printf("SLTU\n");
+                  uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  uint32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  uint32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  if(RegFile[rs] < RegFile[rt])
+                    temp = 1;
+                  else
+                    temp = 0;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
+
+              case 0x3: /*sra - Jeter*/
+                  printf("SRA\n");
+                  int32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data1 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  int32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  int32_t sa = CurrentInstruction & 0x7C0; /*masks off sa*/
+                  data2 = RegFile[sa];
+                  temp = data1 >> data2;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
+
+              case 0x7: /*srav - Jeter*/
+                  printf("SLLV\n");
+                  uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  uint32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  uint32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  temp = data2 >> data1;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
+
+              /*srl*/
+              case 0x2: /*srl - Jeter*/
+                  printf("SRL\n");
+                  uint32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data1 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  uint32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  uint32_t sa = CurrentInstruction & 0x7C0; /*masks off sa*/
+                  data2 = RegFile[sa];
+                  temp = data1 >> data2;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
+
+              /*srlv*/
+              case 0x6: /*srlv - Jeter*/
+                  printf("SRLV\n");
+                  uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  uint32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+                  rt = rt >> 16;
+                  data2 = RegFile[rt];
+                  printf("rt %i: %i\n",rt, data2);
+                  uint32_t rd = CurrentInstruction & 0xFC00; /*masks off rd*/
+                  rd = rd >> 11;
+                  temp = data2 >> data1;
+                  printf("temp: %i\n",temp);
+                  RegFile[rd] = temp;
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
+
               /*
-              *sltu
-              *sra
-              *srav
-              *srl
-              *srlv
               *jalr
               *jr
-              *NOP
               */
             }
           break; /*op 0*/
@@ -266,6 +520,22 @@ int main(int argc, char * argv[]) {
               immediate = CurrentInstruction & 0xFFFF;
               printf("immediate: %04x\n",immediate);
               temp = RegFile[rs] + immediate;
+              printf("temp: %04x\n",temp);
+              RegFile[rt] = temp;
+              printf("rt: %04x\n",RegFile[rt]);
+          break;
+
+          case 0xC:/*andi - Jeter*/
+              printf("ANDI\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs: %04x\n",rs);
+              rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt: %04x\n",rt);
+              immediate = CurrentInstruction & 0xFFFF;
+              printf("immediate: %04x\n",immediate);
+              temp = RegFile[rs] & immediate;
               printf("temp: %04x\n",temp);
               RegFile[rt] = temp;
               printf("rt: %04x\n",RegFile[rt]);
@@ -303,11 +573,45 @@ int main(int argc, char * argv[]) {
               printf("rt: %04x\n",RegFile[rt]);
           break;
 
+          case 0xA:/*slti - Jeter*/
+              printf("SLTI\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs: %04x\n",rs);
+              rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt: %04x\n",rt);
+              immediate = CurrentInstruction & 0xFFFF;
+              printf("immediate: %04x\n",immediate);
+              if(RegFile[rs] < immediate)
+                    temp = 1;
+              else
+                    temp = 0;
+              printf("temp: %04x\n",temp);
+              RegFile[rt] = temp;
+              printf("rt: %04x\n",RegFile[rt]);
+          break;
+
+          case 0xB:/*sltiu - Jeter*/
+              printf("SLTIU\n");
+              uint32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs: %04x\n",rs);
+              uint32_t rt = CurrentInstruction & 0xF8000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt: %04x\n",rt);
+              immediate = CurrentInstruction & 0xFFFF;
+              printf("immediate: %04x\n",immediate);
+              if(RegFile[rs] < immediate)
+                    temp = 1;
+              else
+                    temp = 0;
+              printf("temp: %04x\n",temp);
+              RegFile[rt] = temp;
+              printf("rt: %04x\n",RegFile[rt]);
+          break;
+
         /*TO DO:
-          * andi
-          * xori
-          * slti
-          * sltiu
           beq
           beql
           bgez
