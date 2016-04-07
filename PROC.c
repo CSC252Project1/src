@@ -159,7 +159,7 @@ int main(int argc, char * argv[]) {
                   int64_t product = rs*rt;
                   RegFile[33] = product & 0xFFFFFFFF;
                   RegFile[32] = product & 0xFFFFFFFF00000000;
-                  printf("product: %i and in hex %x\n",product,product);
+                  printf("product: %f and in hex %x\n",product,product);
               break;
 
               /*multu*/
@@ -176,7 +176,7 @@ int main(int argc, char * argv[]) {
                   uint64_t uproduct = rs*rt;
                   RegFile[33] = uproduct & 0xFFFFFFFF;
                   RegFile[32] = uproduct & 0xFFFFFFFF00000000;
-                  printf("product: %i and in hex %x\n",uproduct,uproduct);
+                  printf("product: %f and in hex %x\n",uproduct,uproduct);
               break;
 
               case 0x1A:/***div - Jeter**/
@@ -223,8 +223,8 @@ int main(int argc, char * argv[]) {
                   }
                   printf("quoitent: %04x\n",uquoitent);
                   printf("remainder: %04x\n",urem);
-                  RegFile[34] = uquoitent; /*Write to LO*/
-                  RegFile[33] = urem; /*Write to HI*/
+                  RegFile[33] = uquoitent; /*Write to LO*/
+                  RegFile[32] = urem; /*Write to HI*/
               break;
 
               /*mfhi*/
@@ -232,7 +232,7 @@ int main(int argc, char * argv[]) {
                   printf("MFHI\n");
                   rd = CurrentInstruction & 0xFC00; /*masks off rd*/
                   rd = rd >> 11;
-                  RegFile[rd] = RegFile[34];
+                  RegFile[rd] = RegFile[33];
                   printf("rd %i: %i\n",rd, RegFile[rd]);
               break;
 
@@ -241,7 +241,7 @@ int main(int argc, char * argv[]) {
                   printf("MFLO\n");
                   rd = CurrentInstruction & 0xFC00; /*masks off rd*/
                   rd = rd >> 11;
-                  RegFile[rd] = RegFile[33];
+                  RegFile[rd] = RegFile[32];
                   printf("rd %i: %i\n",rd, RegFile[rd]);
               break;
 
@@ -250,7 +250,7 @@ int main(int argc, char * argv[]) {
                   printf("MTHI\n");
                   rs = CurrentInstruction & 0x3E00000;
                   rs = rs >> 21;
-                  RegFile[34] = RegFile[rs];
+                  RegFile[33] = RegFile[rs];
                   printf("rs %i: %i\n",rs, RegFile[34]);
               break;
 
@@ -259,7 +259,7 @@ int main(int argc, char * argv[]) {
                   printf("MTLO\n");
                   rs = CurrentInstruction & 0x3E00000;
                   rs = rs >> 21;
-                  RegFile[33] = RegFile[rs];
+                  RegFile[32] = RegFile[rs];
                   printf("rs %i: %i\n",rs, RegFile[33]);
               break;
 
@@ -331,6 +331,7 @@ int main(int argc, char * argv[]) {
                    printf("temp: %04x\n",temp);
                    RegFile[rd] = temp;
               break;
+/*<<<<<<< Updated upstream
 
               /*sll / NOP */
               case 0x0: /*sll/nop - Jeter*/
@@ -355,6 +356,7 @@ int main(int argc, char * argv[]) {
                     break;
                   }
 
+/*>>>>>>> Stashed changes
               /*sllv*/
               case 0x4: /*sllv - Jeter*/
                   printf("SLLV\n");
@@ -488,6 +490,13 @@ int main(int argc, char * argv[]) {
               break;
 
               /*
+<<<<<<< Updated upstream
+=======
+              *sltu
+              *sra
+              *srav
+              /*srlv
+>>>>>>> Stashed changes
               *jalr
               *jr
               */
