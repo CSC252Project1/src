@@ -26,6 +26,7 @@ int main(int argc, char * argv[]) {
   
     int MaxInst = 0;
     int status = 0;
+    int delaySlot = 0;
     uint32_t i; 
     uint32_t PC,newPC; //This is the starting address of the program in the memory
     uint32_t CurrentInstruction;
@@ -53,9 +54,23 @@ int main(int argc, char * argv[]) {
     printf("Max Instruction to run = %d \n",MaxInst);
     PC = exec.GPC_START;
     for(i=0; i<MaxInst ; i++) {
-        printf("PC: %x\n", PC);
         DynInstCount++;
-        CurrentInstruction = readWord(PC,false);
+        if(newPC != 0){
+          delaySlot++;
+          printf("delaySlot: %i", delaySlot);
+          if(delaySlot == 2){
+            printf("JUMPED PC: %x\n", newPC);
+            CurrentInstruction = readWord(newPC,false);
+            newPC = 0;
+            delaySlot = 0;
+          }else{
+            printf("DELAY SLOT PC: %x\n", PC);
+            CurrentInstruction = readWord(PC,false);
+          }
+        }else{
+            printf("PC: %x\n", PC);
+            CurrentInstruction = readWord(PC,false);
+        }       
         /*CurrentInstruction = 0x410820;*/ 
         printf("CURRENT INSTRUCTION: %04x\n",CurrentInstruction); 
     /********************************/
@@ -514,9 +529,8 @@ int main(int argc, char * argv[]) {
                   printf("JR\n");
                   rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
                   rs = rs >> 21;
-                  data1 = RegFile[rs];
-                  printf("rs %i: %i\n",rs, data1);
-                  PC = data1;
+                  printf("rs %i: %i\n",rs, RegFile[rs]);
+                  newPC = RegFile[rs];
               break;
             }
           break; /*op 0*/
@@ -528,7 +542,7 @@ int main(int argc, char * argv[]) {
               printf("rs %i: %i\n",rs,RegFile[rs]);
               int32_t rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
               rt = rt >> 16;
-              int32_t immediate = CurrentInstruction & 0xFFFF;
+              int16_t immediate = CurrentInstruction & 0xFFFF;
               printf("immediate: %i\n",immediate);
               temp = RegFile[rs] + immediate;
               printf("temp: %i\n",temp);
@@ -544,7 +558,7 @@ int main(int argc, char * argv[]) {
               uint32_t urt = CurrentInstruction & 0x1F0000; /*masks off rt*/
               urt = urt >> 16;
               printf("rt: %04x\n",urt);
-              uint32_t uimmediate = CurrentInstruction & 0xFFFF;
+              uint16_t uimmediate = CurrentInstruction & 0xFFFF;
               printf("immediate: %04x\n",uimmediate);
               utemp = RegFile[urs] + uimmediate;
               printf("temp: %04x\n",utemp);
