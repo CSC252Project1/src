@@ -333,7 +333,6 @@ int main(int argc, char * argv[]) {
                    printf("temp: %04x\n",temp);
                    RegFile[rd] = temp;
               break;
-/*<<<<<<< Updated upstream
 
               /*sll / NOP */
               case 0x0: /*sll/nop - Jeter*/
@@ -358,7 +357,6 @@ int main(int argc, char * argv[]) {
                     break;
                   }
 
-/*>>>>>>> Stashed changes
               /*sllv*/
               case 0x4: /*sllv - Jeter*/
                   printf("SLLV\n");
@@ -491,17 +489,31 @@ int main(int argc, char * argv[]) {
                   printf("rd %i: %i\n",urd,RegFile[urd]);
               break;
 
-              /*
-<<<<<<< Updated upstream
-=======
-              *sltu
-              *sra
-              *srav
-              /*srlv
->>>>>>> Stashed changes
-              *jalr
-              *jr
-              */
+              case 0x9: /*jalr - Jeter (PROBABLY DOESN"T WORK???)*/
+                  printf("JALR\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  rd = CurrentInstruction & 0xF800; /*masks off rd*/
+                  rd = rd >> 11;
+                  if(rd == 0)
+                    rd = 0x1F; /*selects register 31 (implied)*/
+                  if(RegFile[rs] != RegFile[rd]){
+                    RegFile[rd] = PC + 4; /*next address following the branch*/
+                    PC = data1;
+                  }
+                  printf("rd %i: %i\n",rd,RegFile[rd]);
+              break;
+
+              case 0x8: /*jr - Jeter (MIGHT WORK??)*/
+                  printf("JR\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  data1 = RegFile[rs];
+                  printf("rs %i: %i\n",rs, data1);
+                  PC = data1;
+              break;
             }
           break; /*op 0*/
 
@@ -651,8 +663,22 @@ int main(int argc, char * argv[]) {
           bltzal
           bne
           bnel
-          j
-          jal
+          */
+          case 0x2: /*j - Jeter*/
+              printf("J\n");
+              int32_t instr = CurrentInstruction & 0x3FFFFFF; /*masks off instr_index*/
+              PC = PC | instr | 0; //no idea if this works
+              printf("instr: %04x\n",instr);
+          break;
+
+          case 0x3: /*jal - Jeter*/
+              printf("JAL\n");
+              int32_t instr = CurrentInstruction & 0x3FFFFFF; /*masks off instr_index*/
+              RegFile[31] = PC + 8; //return address
+              PC = PC | instr | 0; //no idea if this works
+              printf("instr: %04x\n",instr);
+          break;
+          /*
           LB
           LBU
           LH
