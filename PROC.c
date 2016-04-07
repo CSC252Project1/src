@@ -662,11 +662,12 @@ int main(int argc, char * argv[]) {
               rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
               rt = rt >> 16;
               printf("rt %i: %i\n",rt,RegFile[rt]);
-              int32_t target_offset = CurrentInstruction & 0xFFFF;
-              target_offset << 2;
-              printf("target_offset: %i\n",target_offset);
+              int16_t target_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %04x\n",target_offset);
+              target_offset = target_offset << 2;
+              printf("target_offset shifted: %04x\n",target_offset);
               if(RegFile[rs] == RegFile[rt]){
-                PC = PC + target_offset;
+                newPC = PC + target_offset +4;/*THIS IS PROBABLY WRONNNNGGG*/
               }
           break;
 
