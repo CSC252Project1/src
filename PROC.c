@@ -673,7 +673,7 @@ int main(int argc, char * argv[]) {
 
           case 0x3: /*jal - Jeter*/
               printf("JAL\n");
-              int32_t instr = CurrentInstruction & 0x3FFFFFF; /*masks off instr_index*/
+              instr = CurrentInstruction & 0x3FFFFFF; /*masks off instr_index*/
               RegFile[31] = PC + 8; //return address
               PC = PC | instr | 0; //no idea if this works
               printf("instr: %04x\n",instr);
@@ -683,8 +683,18 @@ int main(int argc, char * argv[]) {
           LBU
           LH
           LHU
-          LUI
-          LW
+          LUI*/
+          case 0xF:/*lui - Kingsley*/
+              printf("LUI\n");
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              immediate = CurrentInstruction & 0xFFFF;
+              printf("immediate: %i\n",immediate);
+              immediate = immediate << 16;
+              RegFile[rt] = immediate;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+          break;
+          /*LW
           LWL
           LWR
           SB
