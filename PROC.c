@@ -57,14 +57,14 @@ int main(int argc, char * argv[]) {
         DynInstCount++;
         if(newPC != 0){
           delaySlot++;
-          printf("delaySlot: %i", delaySlot);
           if(delaySlot == 2){
-            printf("JUMPED PC: %x\n", newPC);
-            CurrentInstruction = readWord(newPC,false);
+            printf("PC: %x (JUMPED)\n", newPC);
+            PC = newPC;
+            CurrentInstruction = readWord(PC,false);
             newPC = 0;
             delaySlot = 0;
           }else{
-            printf("DELAY SLOT PC: %x\n", PC);
+            printf("PC: %x (DELAY SLOT)\n", PC);
             CurrentInstruction = readWord(PC,false);
           }
         }else{
