@@ -622,8 +622,25 @@ int main(int argc, char * argv[]) {
               printf("rt: %04x\n",RegFile[urt]);
           break;
 
+
+          /*beq*/
+          case 0x4:/*beq - Kingsley*/
+              printf("BEQ\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs %i: %i\n",rs,RegFile[rs]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+              int32_t target_offset = CurrentInstruction & 0xFFFF;
+              target_offset << 2;
+              printf("target_offset: %i\n",target_offset);
+              if(RegFile[rs] == RegFile[rt]){
+                PC = PC + target_offset;
+              }
+          break;
+
         /*TO DO:
-          beq
           beql
           bgez
           bgezal
