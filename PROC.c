@@ -80,6 +80,7 @@ int main(int argc, char * argv[]) {
         int32_t temp, data1, data2;
         uint32_t utemp, udata1, udata2;
         uint32_t funct = CurrentInstruction & 0x3F; /*masks off funct*/
+        uint32_t cond = CurrentInstruction & 0x1F0000; /*masks off condition for relative conditional branch*/
         printf("funct: %x\n",funct);
         uint32_t op = CurrentInstruction & 0xFC000000; /*masks off funct*/
         op = op >> 26;
@@ -671,18 +672,157 @@ int main(int argc, char * argv[]) {
               }
           break;
 
-        /*TO DO:
-          beql
-          bgez
-          bgezal
-          bgtz
-          blez
-          blezl
-          bltz
-          bltzal
-          bne
-          bnel
-          */
+          case 0x14:/*beql*/
+              printf("BEQL\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs %i: %i\n",rs,RegFile[rs]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              target_offset << 2;
+              printf("target_offset: %i\n",target_offset);
+              if(RegFile[rs] == RegFile[rt]){
+                PC = PC + target_offset;
+              }
+              else
+                PC = PC + 4; /*skip to next instruction*/
+          break;
+
+          case 0x1:
+              switch(cond){
+                case 0x1: /*bgez*/
+                  printf("BGEZ\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  printf("rs %i: %i\n",rs,RegFile[rs]);
+                  target_offset = CurrentInstruction & 0xFFFF;
+                  target_offset << 2;
+                  printf("target_offset: %i\n",target_offset);
+                  if(RegFile[rs] >= 0){
+                    PC = PC + target_offset;
+                  }
+                break;
+
+                case 0x11: /*bgezal*/
+                  printf("BGEZAL\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  printf("rs %i: %i\n",rs,RegFile[rs]);
+                  target_offset = CurrentInstruction & 0xFFFF;
+                  target_offset << 2;
+                  printf("target_offset: %i\n",target_offset);
+                  RegFile[31] = PC + 8;
+                  if(RegFile[rs] == RegFile[rt]){
+                    PC = PC + target_offset;
+                  }
+                break;
+
+                case 0x0:/*bltz*/
+                  printf("BLTZ\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  printf("rs %i: %i\n",rs,RegFile[rs]);
+                  target_offset = CurrentInstruction & 0xFFFF;
+                  target_offset << 2;
+                  printf("target_offset: %i\n",target_offset);
+                  if(RegFile[rs] < 0){
+                    PC = PC + target_offset;
+                  }
+                break;
+
+                case 0x10: /*bltzal*/
+                  printf("BEQL\n");
+                  rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+                  rs = rs >> 21;
+                  printf("rs %i: %i\n",rs,RegFile[rs]);
+                  target_offset = CurrentInstruction & 0xFFFF;
+                  target_offset << 2;
+                  printf("target_offset: %i\n",target_offset);
+                  RegFile[31] = PC + 8;
+                  if(RegFile[rs] < 0){
+                    PC = PC + target_offset;
+                  }
+                break;
+              }
+          break;
+
+          case 0x7: /*bgtz*/
+              printf("BGTZ\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs %i: %i\n",rs,RegFile[rs]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              target_offset << 2;
+              printf("target_offset: %i\n",target_offset);
+              if(RegFile[rs] > 0){
+                PC = PC + target_offset;
+              }
+          break;
+
+          case 0x6: /*blez*/
+              printf("BLEZ\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs %i: %i\n",rs,RegFile[rs]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              target_offset << 2;
+              printf("target_offset: %i\n",target_offset);
+              if(RegFile[rs] =< 0){
+                PC = PC + target_offset;
+              }
+          break;
+
+          case 0x7: /*blezl*/
+              printf("BLEZL\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs %i: %i\n",rs,RegFile[rs]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              target_offset << 2;
+              printf("target_offset: %i\n",target_offset);
+              if(RegFile[rs] =< 0){
+                PC = PC + target_offset;
+              }
+              else
+                PC = PC + 4; /*skips to next instruction*/
+          break;
+
+          case 0x5: /*bne*/
+              printf("BNE\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs %i: %i\n",rs,RegFile[rs]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              target_offset << 2;
+              printf("target_offset: %i\n",target_offset);
+              if(RegFile[rs] != RegFile[rt]){
+                PC = PC + target_offset;
+              }
+          break;
+
+          case 0x5: /*bnel*/
+              printf("BNEL\n");
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs %i: %i\n",rs,RegFile[rs]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              target_offset << 2;
+              printf("target_offset: %i\n",target_offset);
+              if(RegFile[rs] != RegFile[rt]){
+                PC = PC + target_offset;
+              }
+              else
+                PC = PC + 4;
+          break;
+         
           case 0x2: /*j - Jeter*/
               printf("J\n");
               int32_t instr = CurrentInstruction & 0x3FFFFFF; /*masks off instr_index*/
@@ -763,32 +903,7 @@ int main(int argc, char * argv[]) {
               RegFile[rt] = immediate;
               printf("rt: %04x\n",RegFile[rt]);
           break;
-          /*
-<<<<<<< HEAD
-          LB*/
-          /*
-          case 0x23:
-              printf("LB\n");
-              rt = CurrentInstruction & 0x1F0000;
-              rt = rt >> 16;
-              int32_t offset = CurrentInstruction & 0xFFFF;
-              printf("offset: %i\n",offset);
-              printf("rs %i: %i\n",rs,RegFile[rs]);
-              base = CurrentInstruction & 0x3E00000;
-              RegFile[rt] = readWord((offset + base),0);
-          break;
-          */
-          /*
-          case 0xF:
-              printf("LUI\n");
-              rt = CurrentInstruction & 0x1F0000; 
-              rt = rt >> 16;
-              immediate = CurrentInstruction & 0xFFFF;
-              printf("immediate: %i\n",immediate);
-              immediate = immediate << 16;
-              RegFile[rt] = immediate;
-              printf("rt %i: %i\n",rt,RegFile[rt]);
-          break;
+          
           /*LW*/
           case 0x23:/*lw - Kingsley*/
               printf("LW\n");
@@ -802,8 +917,7 @@ int main(int argc, char * argv[]) {
               RegFile[rt] = readWord((RegFile[rs] + offset),0);
               printf("rt %i: %i\n",rt,RegFile[rt]);
           break;
-          /*LW
->>>>>>> origin/master
+          /*
           LWL
           LWR
           SB
