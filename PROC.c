@@ -678,12 +678,73 @@ int main(int argc, char * argv[]) {
               PC = PC | instr | 0; //no idea if this works
               printf("instr: %04x\n",instr);
           break;
+
+          case 0x20: /*lb - Jeter*/
+              printf("LB\n");
+              int32_t base = CurrentInstruction & 0x3E00000; /*masks off base*/
+              base = base >> 21;
+              printf("base %i: %i\n",base,RegFile[base]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %i\n",target_offset);
+              RegFile[rt] = RegFile[base + target_offset];
+          break;
+
+          case 0x24: /*lbu - Jeter*/
+              printf("LBU\n");
+              uint32_t ubase = CurrentInstruction & 0x3E00000; /*masks off base*/
+              ubase = ubase >> 21;
+              printf("base %i: %i\n",ubase,RegFile[ubase]);
+              urt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              urt = urt >> 16;
+              printf("rt %i: %i\n",urt,RegFile[urt]);
+              uint32_t utarget_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %i\n",utarget_offset);
+              RegFile[urt] = RegFile[ubase + utarget_offset];
+          break;
+    
+          case 0x21: /*lh - Jeter*/
+              printf("LH\n");
+              base = CurrentInstruction & 0x3E00000; /*masks off base*/
+              base = base >> 21;
+              printf("base %i: %i\n",base,RegFile[base]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %i\n",target_offset);
+              data1 = RegFile[base + target_offset] >> 16; /*sign extend half word*/
+              RegFile[rt] = data1;
+          break;
+
+          case 0x25: /*lhu - Jeter*/
+              printf("LHU\n");
+              ubase = CurrentInstruction & 0x3E00000; /*masks off base*/
+              ubase = ubase >> 21;
+              printf("base %i: %i\n",ubase,RegFile[ubase]);
+              urt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              urt = urt >> 16;
+              printf("rt %i: %i\n",urt,RegFile[urt]);
+              utarget_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %i\n",utarget_offset);
+              udata1 = RegFile[ubase + utarget_offset] >> 16; /*0 extended half word*/
+              RegFile[urt] = udata1;
+          break;
+
+          case 0xF: /*lui - Jeter*/
+              printf("LUI\n");
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt: %04x\n",rt);
+              immediate = CurrentInstruction & 0xFFFF;
+              immediate = immediate << 16; /*shift left 16 bits to load into upper half of a word*/
+              printf("immediate: %04x\n",immediate);
+              RegFile[rt] = immediate;
+              printf("rt: %04x\n",RegFile[rt]);
+          break;
           /*
-          LB
-          LBU
-          LH
-          LHU
-          LUI
           LW
           LWL
           LWR
