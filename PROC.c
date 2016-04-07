@@ -53,6 +53,7 @@ int main(int argc, char * argv[]) {
     printf("Max Instruction to run = %d \n",MaxInst);
     PC = exec.GPC_START;
     for(i=0; i<MaxInst ; i++) {
+        printf("PC: %x\n", PC);
         DynInstCount++;
         CurrentInstruction = readWord(PC,false);
         /*CurrentInstruction = 0x410820;*/ 
@@ -63,10 +64,13 @@ int main(int argc, char * argv[]) {
         /******arith*******/
         int32_t temp, data1, data2;
         uint32_t utemp, udata1, udata2;
-        int funct = CurrentInstruction & 0x3F; /*masks off funct*/
+        uint32_t funct = CurrentInstruction & 0x3F; /*masks off funct*/
         printf("funct: %x\n",funct);
-        int op = CurrentInstruction & 0xFC000000; /*masks off funct*/
+        uint32_t op = CurrentInstruction & 0xFC000000; /*masks off funct*/
         op = op >> 26;
+        /*if((0x80000000 & op) == 0x80000000){/*positifies*/
+          /*op = op & 0x3F;
+        }*/
         printf("op: %x\n",op);
 
         switch(op){
@@ -519,7 +523,7 @@ int main(int argc, char * argv[]) {
 
           case 0x8:/*addi Kingsley*/
               printf("ADDI\n");
-              int32_t rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              int rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
               rs = rs >> 21;
               printf("rs %i: %i\n",rs,RegFile[rs]);
               int32_t rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
@@ -678,15 +682,91 @@ int main(int argc, char * argv[]) {
               PC = PC | instr | 0; //no idea if this works
               printf("instr: %04x\n",instr);
           break;
-          /*
-          LB
-          LBU
-          LH
-          LHU
-          LUI*/
-          case 0xF:/*lui - Kingsley*/
+
+          case 0x20: /*lb - Jeter*/
+              printf("LB\n");
+              int32_t base = CurrentInstruction & 0x3E00000; /*masks off base*/
+              base = base >> 21;
+              printf("base %i: %i\n",base,RegFile[base]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %i\n",target_offset);
+              RegFile[rt] = RegFile[base + target_offset];
+          break;
+
+          case 0x24: /*lbu - Jeter*/
+              printf("LBU\n");
+              uint32_t ubase = CurrentInstruction & 0x3E00000; /*masks off base*/
+              ubase = ubase >> 21;
+              printf("base %i: %i\n",ubase,RegFile[ubase]);
+              urt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              urt = urt >> 16;
+              printf("rt %i: %i\n",urt,RegFile[urt]);
+              uint32_t utarget_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %i\n",utarget_offset);
+              RegFile[urt] = RegFile[ubase + utarget_offset];
+          break;
+    
+          case 0x21: /*lh - Jeter*/
+              printf("LH\n");
+              base = CurrentInstruction & 0x3E00000; /*masks off base*/
+              base = base >> 21;
+              printf("base %i: %i\n",base,RegFile[base]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %i\n",target_offset);
+              data1 = RegFile[base + target_offset] >> 16; /*sign extend half word*/
+              RegFile[rt] = data1;
+          break;
+
+          case 0x25: /*lhu - Jeter*/
+              printf("LHU\n");
+              ubase = CurrentInstruction & 0x3E00000; /*masks off base*/
+              ubase = ubase >> 21;
+              printf("base %i: %i\n",ubase,RegFile[ubase]);
+              urt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              urt = urt >> 16;
+              printf("rt %i: %i\n",urt,RegFile[urt]);
+              utarget_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %i\n",utarget_offset);
+              udata1 = RegFile[ubase + utarget_offset] >> 16; /*0 extended half word*/
+              RegFile[urt] = udata1;
+          break;
+
+          case 0xF: /*lui - Jeter*/
               printf("LUI\n");
               rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt: %04x\n",rt);
+              immediate = CurrentInstruction & 0xFFFF;
+              immediate = immediate << 16; /*shift left 16 bits to load into upper half of a word*/
+              printf("immediate: %04x\n",immediate);
+              RegFile[rt] = immediate;
+              printf("rt: %04x\n",RegFile[rt]);
+          break;
+          /*
+<<<<<<< HEAD
+          LB*/
+          /*
+          case 0x23:
+              printf("LB\n");
+              rt = CurrentInstruction & 0x1F0000;
+              rt = rt >> 16;
+              int32_t offset = CurrentInstruction & 0xFFFF;
+              printf("offset: %i\n",offset);
+              printf("rs %i: %i\n",rs,RegFile[rs]);
+              base = CurrentInstruction & 0x3E00000;
+              RegFile[rt] = readWord((offset + base),0);
+          break;
+          */
+          /*
+          case 0xF:
+              printf("LUI\n");
+              rt = CurrentInstruction & 0x1F0000; 
               rt = rt >> 16;
               immediate = CurrentInstruction & 0xFFFF;
               printf("immediate: %i\n",immediate);
@@ -694,7 +774,21 @@ int main(int argc, char * argv[]) {
               RegFile[rt] = immediate;
               printf("rt %i: %i\n",rt,RegFile[rt]);
           break;
+          /*LW*/
+          case 0x23:/*lw - Kingsley*/
+              printf("LW\n");
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              int16_t offset = CurrentInstruction & 0xFFFF;
+              printf("offset: %x\n",offset);
+              rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
+              rs = rs >> 21;
+              printf("rs %i: %x\n",rs,RegFile[rs]);
+              RegFile[rt] = readWord((RegFile[rs] + offset),0);
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+          break;
           /*LW
+>>>>>>> origin/master
           LWL
           LWR
           SB
@@ -707,7 +801,6 @@ int main(int argc, char * argv[]) {
       /*syscall*/
     printRegFile();
     PC = PC + 4;
-
     }
 }
 
