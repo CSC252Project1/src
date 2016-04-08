@@ -534,6 +534,10 @@ int main(int argc, char * argv[]) {
                   printf("rs %i: %i\n",rs, RegFile[rs]);
                   newPC = RegFile[rs];
               break;
+
+              case 0xC: /*syscall - Jeter*/
+                  SyscallExe(RegFile[2]); //probably not right
+              break;
             }
           break; /*op 0*/
 
@@ -653,7 +657,6 @@ int main(int argc, char * argv[]) {
               RegFile[urt] = utemp;
               printf("rt: %04x\n",RegFile[urt]);
           break;
-
 
           /*beq*/
           case 0x4:/*beq - Kingsley*/
@@ -928,10 +931,37 @@ int main(int argc, char * argv[]) {
               RegFile[rt] = readWord((RegFile[rs] + offset),0);
               printf("rt %i: %i\n",rt,RegFile[rt]);
           break;
-          /*
-          LWL
-          LWR
-          */
+
+          case 0x22:/*lwl*/
+              printf("LWL\n");
+              base = CurrentInstruction & 0x3E00000; /*masks off base*/
+              base = base >> 21;
+              printf("base %i: %i\n",base,RegFile[base]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              offset = CurrentInstruction & 0xFFFF;
+              printf("offset: %x\n",offset);
+              data1 = readWord((RegFile[base] + offset),0) >> 16;
+              data1 = data1 << 16;
+              RegFile[rt] |= data1;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+          break;
+
+          case 0x26:/*lwr*/
+              printf("LWR\n");
+              base = CurrentInstruction & 0x3E00000; /*masks off base*/
+              base = base >> 21;
+              printf("base %i: %i\n",base,RegFile[base]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              offset = CurrentInstruction & 0xFFFF;
+              printf("offset: %x\n",offset);
+              udata1 = readWord((RegFile[base] + offset),0) << 16;
+              udata1 = udata1 >> 16; /*unsigned so when shifted right, it won't sign extend*/
+              RegFile[rt] |= udata1;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+          break;
+
           case 0x28:/*sb - Jeter*/
               printf("SB\n");
               base = CurrentInstruction & 0x3E00000; /*masks off base*/
@@ -974,12 +1004,37 @@ int main(int argc, char * argv[]) {
               data1 = RegFile[rt];
               writeWord((RegFile[base] + target_offset),data1,0);
           break;
-          /*
-          SWL
-          SWR
-          */
+
+          case 0x2A:/*swl - Jeter*/
+              printf("SWL\n");
+              base = CurrentInstruction & 0x3E00000; /*masks off base*/
+              base = base >> 21;
+              printf("base %i: %i\n",base,RegFile[base]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %i\n",target_offset);
+              data1 = RegFile[rt] >> 16;
+              data1 = data1 << 16;
+              writeWord((RegFile[base] + target_offset),(data1 | (RegFile[base] + target_offset)),0);
+          break;
+
+          case 0x2E:/*swr - Jeter*/
+              printf("SWR\n");
+              base = CurrentInstruction & 0x3E00000; /*masks off base*/
+              base = base >> 21;
+              printf("base %i: %i\n",base,RegFile[base]);
+              rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
+              rt = rt >> 16;
+              printf("rt %i: %i\n",rt,RegFile[rt]);
+              target_offset = CurrentInstruction & 0xFFFF;
+              printf("target_offset: %i\n",target_offset);
+              udata1 = RegFile[rt] << 16;
+              udata1 = udata1 >> 16; /*unsigned so when shifted, it won't sign extend*/
+              writeWord((RegFile[base] + target_offset),(udata1 | (RegFile[base] + target_offset)),0);
+          break;
       }
-      /*syscall*/
     printRegFile();
     PC = PC + 4;
     }
