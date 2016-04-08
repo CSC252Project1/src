@@ -80,11 +80,12 @@ int main(int argc, char * argv[]) {
         int32_t temp, data1, data2;
         uint32_t utemp, udata1, udata2;
         uint32_t funct = CurrentInstruction & 0x3F; /*masks off funct*/
-        uint32_t cond = CurrentInstruction & 0x1F0000; /*masks off condition for relative conditional branch*/
+        uint32_t cond = CurrentInstruction & 0x3E0000; /*masks off condition for relative conditional branch*/
+	cond = cond >> 16;
         printf("funct: %x\n",funct);
         uint32_t op = CurrentInstruction & 0xFC000000; /*masks off funct*/
         op = op >> 26;
-        /*if((0x80000000 & op) == 0x80000000){/*positifies*/
+        /*if((0x80000000 & op) == 0x80000000){  positifies
           /*op = op & 0x3F;
         }*/
         printf("op: %x\n",op);
@@ -359,7 +360,6 @@ int main(int argc, char * argv[]) {
 
               /*sll / NOP */
               case 0x0: /*sll/nop - Jeter*/
-                  printf("SLL\n");
                   urt = CurrentInstruction & 0x1F0000; /*masks off rt*/
                   urt = urt >> 16;
                   udata1 = RegFile[urt];
@@ -373,6 +373,7 @@ int main(int argc, char * argv[]) {
                     break;
                   }
                   else{
+		     printf("SLL\n");
                     utemp = udata1 << udata2;
                     printf("temp: %i\n",utemp);
                     RegFile[urd] = utemp;
@@ -520,17 +521,17 @@ int main(int argc, char * argv[]) {
                   printf("rs %i: %i\n",rs, data1);
                   rd = CurrentInstruction & 0xF800; /*masks off rd*/
                   rd = rd >> 11;
+		   printf("rd %i\n",rd);
                   if(rd == 0)
                     rd = 0x1F; /*selects register 31 (implied)*/
                   if(RegFile[rs] != RegFile[rd]){
                     RegFile[rd] = PC + 8; /*next address following the branch*/
-                    newPC = PC + 4; /*branch delay slot*/
-                    PC = data1;
+                    newPC = data1; /*branch delay slot*/
                   }
                   printf("rd %i: %i\n",rd,RegFile[rd]);
               break;
 
-              case 0x8: /*jr - Jeter (MIGHT WORK??)*/
+              case 0x8: /*jr - Jeter*/
                   printf("JR\n");
                   rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
                   rs = rs >> 21;
@@ -675,7 +676,7 @@ int main(int argc, char * argv[]) {
               target_offset = target_offset << 2;
               printf("target_offset shifted: %04x\n",target_offset);
               if(RegFile[rs] == RegFile[rt]){
-                newPC = PC + target_offset +4;/*THIS IS PROBABLY WRONNNNGGG*/
+		newPC = PC + target_offset + 4;/*THIS IS PROBABLY WRONNNNGGG*/
               }
           break;
 
@@ -688,17 +689,17 @@ int main(int argc, char * argv[]) {
               rt = rt >> 16;
               printf("rt %i: %i\n",rt,RegFile[rt]);
               target_offset = CurrentInstruction & 0xFFFF;
-              target_offset << 2;
+              target_offset = target_offset << 2;
               printf("target_offset: %i\n",target_offset);
               if(RegFile[rs] == RegFile[rt]){
-                newPC = PC + 4;
-                PC = PC + target_offset;
+                newPC = PC + target_offset+4;
               }
               else
                 PC = PC + 8; /*skip to next instruction*/
           break;
 
           case 0x1:
+	      printf("cond: %x\n", cond);
               switch(cond){
                 case 0x1: /*bgez*/
                   printf("BGEZ\n");
@@ -706,11 +707,10 @@ int main(int argc, char * argv[]) {
                   rs = rs >> 21;
                   printf("rs %i: %i\n",rs,RegFile[rs]);
                   target_offset = CurrentInstruction & 0xFFFF;
-                  target_offset << 2;
+                  target_offset = target_offset << 2;
                   printf("target_offset: %i\n",target_offset);
                   if(RegFile[rs] >= 0){
-                    newPC = PC + 4;
-                    PC = PC + target_offset;
+                    newPC = PC + target_offset+4;
                   }
                 break;
 
@@ -720,12 +720,11 @@ int main(int argc, char * argv[]) {
                   rs = rs >> 21;
                   printf("rs %i: %i\n",rs,RegFile[rs]);
                   target_offset = CurrentInstruction & 0xFFFF;
-                  target_offset << 2;
+                  target_offset = target_offset << 2;
                   printf("target_offset: %i\n",target_offset);
                   RegFile[31] = PC + 8;
                   if(RegFile[rs] == RegFile[rt]){
-                    newPC = PC + 4;
-                    PC = PC + target_offset;
+                    newPC = PC + target_offset +4;
                   }
                 break;
 
@@ -735,26 +734,25 @@ int main(int argc, char * argv[]) {
                   rs = rs >> 21;
                   printf("rs %i: %i\n",rs,RegFile[rs]);
                   target_offset = CurrentInstruction & 0xFFFF;
-                  target_offset << 2;
+                  target_offset = target_offset << 2;
                   printf("target_offset: %i\n",target_offset);
                   if(RegFile[rs] < 0){
-                    newPC = PC + 4;
-                    PC = PC + target_offset;
+                    newPC = PC + target_offset + 4;
                   }
                 break;
 
                 case 0x10: /*bltzal*/
-                  printf("BEQL\n");
+                  printf("BLTZAL\n");
                   rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
                   rs = rs >> 21;
                   printf("rs %i: %i\n",rs,RegFile[rs]);
                   target_offset = CurrentInstruction & 0xFFFF;
-                  target_offset << 2;
+                  target_offset = target_offset << 2;
                   printf("target_offset: %i\n",target_offset);
                   RegFile[31] = PC + 8;
-                  if(RegFile[rs] < 0){
-                    newPC = PC + 4;
-                    PC = PC + target_offset;
+                  if(RegFile[rs] <=0){
+		     RegFile[31] = PC + 8;
+                    newPC = PC + target_offset + 4;
                   }
                 break;
               }
@@ -766,11 +764,10 @@ int main(int argc, char * argv[]) {
               rs = rs >> 21;
               printf("rs %i: %i\n",rs,RegFile[rs]);
               target_offset = CurrentInstruction & 0xFFFF;
-              target_offset << 2;
+              target_offset = target_offset << 2;
               printf("target_offset: %i\n",target_offset);
-              if(RegFile[rs] > 0){
-                newPC = PC + 4;
-                PC = PC + target_offset;
+              if(RegFile[rs] > 0){newPC = PC + 4;
+                newPC = PC + target_offset+4;
               }
           break;
 
@@ -780,11 +777,10 @@ int main(int argc, char * argv[]) {
               rs = rs >> 21;
               printf("rs %i: %i\n",rs,RegFile[rs]);
               target_offset = CurrentInstruction & 0xFFFF;
-              target_offset << 2;
+              target_offset = target_offset << 2;
               printf("target_offset: %i\n",target_offset);
               if(RegFile[rs] <= 0){
-                newPC = PC + 4;
-                PC = PC + target_offset;
+                newPC = PC + target_offset+4;
               }
           break;
 
@@ -794,14 +790,13 @@ int main(int argc, char * argv[]) {
               rs = rs >> 21;
               printf("rs %i: %i\n",rs,RegFile[rs]);
               target_offset = CurrentInstruction & 0xFFFF;
-              target_offset << 2;
+              target_offset = target_offset << 2;
               printf("target_offset: %i\n",target_offset);
               if(RegFile[rs] <= 0){
-                newPC = PC + 4;
-                PC = PC + target_offset;
+                newPC = PC + target_offset+4;
               }
               else
-                PC = PC + 8; /*skips to next instruction*/
+                PC = PC + 4; /*skips to next instruction*/
           break;
 
           case 0x5: /*bne*/
@@ -813,11 +808,10 @@ int main(int argc, char * argv[]) {
               rt = rt >> 16;
               printf("rt %i: %i\n",rt,RegFile[rt]);
               target_offset = CurrentInstruction & 0xFFFF;
-              target_offset << 2;
+              target_offset = target_offset << 2;
               printf("target_offset: %i\n",target_offset);
               if(RegFile[rs] != RegFile[rt]){
-                newPC = PC + 4;
-                PC = PC + target_offset;
+                newPC = PC + target_offset+4;
               }
           break;
 
@@ -830,14 +824,13 @@ int main(int argc, char * argv[]) {
               rt = rt >> 16;
               printf("rt %i: %i\n",rt,RegFile[rt]);
               target_offset = CurrentInstruction & 0xFFFF;
-              target_offset << 2;
+              target_offset = target_offset << 2;
               printf("target_offset: %i\n",target_offset);
               if(RegFile[rs] != RegFile[rt]){
-                newPC = PC + 4;
-                PC = PC + target_offset;
+                newPC = PC + target_offset+4;
               }
               else
-                PC = PC + 8;
+                PC = PC + 4;
           break;
          
           case 0x2: /*j - Jeter*/
@@ -851,7 +844,7 @@ int main(int argc, char * argv[]) {
               printf("JAL\n");
               instr = CurrentInstruction & 0x3FFFFFF; /*masks off instr_index*/
               RegFile[31] = PC + 8; //return address
-              PC = PC | instr | 0; //no idea if this works
+              newPC = PC | instr | 0; //no idea if this works
               printf("instr: %04x\n",instr);
           break;
 
@@ -915,10 +908,11 @@ int main(int argc, char * argv[]) {
               rt = rt >> 16;
               printf("rt: %04x\n",rt);
               immediate = CurrentInstruction & 0xFFFF;
-              immediate = immediate << 16; /*shift left 16 bits to load into upper half of a word*/
-              printf("immediate: %04x\n",immediate);
-              RegFile[rt] = immediate;
-              printf("rt: %04x\n",RegFile[rt]);
+	       printf("immediate: %x\n",immediate);
+              int32_t imm = immediate << 16; /*shift left 16 bits to load into upper half of a word*/
+              printf("imm: %x\n",imm);
+              RegFile[rt] = imm;
+              printf("rt: %x\n",RegFile[rt]);
           break;
           
           /*LW*/
@@ -1038,7 +1032,7 @@ int main(int argc, char * argv[]) {
               writeWord((RegFile[base] + target_offset),(udata1 | (RegFile[base] + target_offset)),0);
           break;
       }
-    printRegFile();
+    //printRegFile();
     PC = PC + 4;
     }
 }
