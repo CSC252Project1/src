@@ -179,7 +179,8 @@ int main(int argc, char * argv[]) {
                   int64_t product = rs*rt;
                   RegFile[33] = product & 0xFFFFFFFF;
                   RegFile[32] = product & 0xFFFFFFFF00000000;
-                  printf("product: %f and in hex %x\n",product,product);
+                  printf("LOW: %08x\n",product & 0xFFFFFFFF);
+                  printf("HI: %08x\n",product & 0xFFFFFFFF00000000);
               break;
 
               /*multu*/
@@ -254,7 +255,7 @@ int main(int argc, char * argv[]) {
                   printf("MFHI\n");
                   rd = CurrentInstruction & 0xF800; /*masks off rd*/
                   rd = rd >> 11;
-                  RegFile[rd] = RegFile[33];
+                  RegFile[rd] = RegFile[32];
                   printf("rd %i: %i\n",rd, RegFile[rd]);
               break;
 
@@ -263,7 +264,7 @@ int main(int argc, char * argv[]) {
                   printf("MFLO\n");
                   rd = CurrentInstruction & 0xF800; /*masks off rd*/
                   rd = rd >> 11;
-                  RegFile[rd] = RegFile[32];
+                  RegFile[rd] = RegFile[33];
                   printf("rd %i: %i\n",rd, RegFile[rd]);
               break;
 
@@ -272,8 +273,9 @@ int main(int argc, char * argv[]) {
                   printf("MTHI\n");
                   rs = CurrentInstruction & 0x3E00000;
                   rs = rs >> 21;
-                  RegFile[33] = RegFile[rs];
-                  printf("rs %i: %i\n",rs, RegFile[34]);
+                  printf("RS %i: %i\n",rs, RegFile[rs]);
+                  RegFile[32] = RegFile[rs];
+                  printf("HI: %i\n",rs, RegFile[32]);
               break;
 
               /*mtlo*/
@@ -281,8 +283,9 @@ int main(int argc, char * argv[]) {
                   printf("MTLO\n");
                   rs = CurrentInstruction & 0x3E00000;
                   rs = rs >> 21;
-                  RegFile[32] = RegFile[rs];
-                  printf("rs %i: %i\n",rs, RegFile[33]);
+                  printf("RS %i: %i\n",rs, RegFile[rs]);
+                  RegFile[33] = RegFile[rs];
+                  printf("LO: %i\n",rs, RegFile[33]);
               break;
 
               /*and*/
@@ -779,13 +782,13 @@ int main(int argc, char * argv[]) {
               target_offset = CurrentInstruction & 0xFFFF;
               target_offset << 2;
               printf("target_offset: %i\n",target_offset);
-              if(RegFile[rs] =< 0){
+              if(RegFile[rs] <= 0){
                 newPC = PC + 4;
                 PC = PC + target_offset;
               }
           break;
 
-          case 0x7: /*blezl*/
+          case 0x16: /*blezl*/
               printf("BLEZL\n");
               rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
               rs = rs >> 21;
@@ -793,7 +796,7 @@ int main(int argc, char * argv[]) {
               target_offset = CurrentInstruction & 0xFFFF;
               target_offset << 2;
               printf("target_offset: %i\n",target_offset);
-              if(RegFile[rs] =< 0){
+              if(RegFile[rs] <= 0){
                 newPC = PC + 4;
                 PC = PC + target_offset;
               }
@@ -818,7 +821,7 @@ int main(int argc, char * argv[]) {
               }
           break;
 
-          case 0x5: /*bnel*/
+          case 0x15: /*bnel*/
               printf("BNEL\n");
               rs = CurrentInstruction & 0x3E00000; /*masks off rs*/
               rs = rs >> 21;
@@ -991,7 +994,7 @@ int main(int argc, char * argv[]) {
               writeWord((RegFile[base] + target_offset),data1,0);
           break;
 
-          case 0x23:/*sw - Jeter*/
+          case 0x2B:/*sw - Jeter*/
               printf("SW\n");
               base = CurrentInstruction & 0x3E00000; /*masks off base*/
               base = base >> 21;
