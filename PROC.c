@@ -208,7 +208,7 @@ int main(int argc, char * argv[]) {
                   rs = CurrentInstruction & 0x3E00000;
                   rs = rs >> 21;
                   printf("rs%i: %i\n",rs,RegFile[rs]);
-                  rt = CurrentInstruction & 0xF8000;
+                  rt = CurrentInstruction & 0x1F0000;
                   rt = rt >> 16;
                   printf("rt%i: %i\n",rt,RegFile[rt]);
                   if(RegFile[rt] != 0){
@@ -234,7 +234,7 @@ int main(int argc, char * argv[]) {
                   urs = CurrentInstruction & 0x3E00000;
                   urs = urs >> 21;
                   printf("rs: %04x\n",rs);
-                  urt = CurrentInstruction & 0xF8000;
+                  urt = CurrentInstruction & 0x1F0000;
                   urt = urt >> 16;
                   printf("rt: %04x\n",rt);
                   if(urt != 0){
@@ -295,7 +295,7 @@ int main(int argc, char * argv[]) {
                    rs = CurrentInstruction & 0x3E00000;
                    rs = rs >> 21;
                    printf("rs %i: %x\n",rs, RegFile[rs]);
-                   rt = CurrentInstruction & 0xF8000;
+                   rt = CurrentInstruction & 0x1F0000;
                    rt = rt >> 16;
                    printf("rt %i: %x\n",rt, RegFile[rt]);
                    rd = CurrentInstruction & 0xF800;
@@ -312,7 +312,7 @@ int main(int argc, char * argv[]) {
                    rs = CurrentInstruction & 0x3E00000;
                    rs = rs >> 21;
                    printf("rs %i: %x\n",rs, RegFile[rs]);
-                   rt = CurrentInstruction & 0xF8000;
+                   rt = CurrentInstruction & 0x1F0000;
                    rt = rt >> 16;
                    printf("rt %i: %x\n",rt, RegFile[rt]);
                    rd = CurrentInstruction & 0xF800;
@@ -329,7 +329,7 @@ int main(int argc, char * argv[]) {
                    rs = CurrentInstruction & 0x3E00000;
                    rs = rs >> 21;
                    printf("rs %i: %i\n",rs, RegFile[rs]);
-                   rt = CurrentInstruction & 0xF8000;
+                   rt = CurrentInstruction & 0x1F0000;
                    rt = rt >> 16;
                    printf("rt %i: %i\n",rt, RegFile[rt]);
                    rd = CurrentInstruction & 0xF800;
@@ -347,7 +347,7 @@ int main(int argc, char * argv[]) {
                    rs = CurrentInstruction & 0x3E00000;
                    rs = rs >> 21;
                    printf("rs %i: %i\n",rs, RegFile[rs]);
-                   rt = CurrentInstruction & 0xF8000;
+                   rt = CurrentInstruction & 0x1F0000;
                    rt = rt >> 16;
                    printf("rt %i: %i\n",rt, RegFile[rt]);
                    rd = CurrentInstruction & 0xF800;
@@ -367,6 +367,8 @@ int main(int argc, char * argv[]) {
                   urd = CurrentInstruction & 0xF800; /*masks off rd*/
                   urd = urd >> 11;
                   uint32_t usa = CurrentInstruction & 0x7C0; /*masks off sa*/
+                  usa = usa >> 6;
+                  printf("rt %04x: %i\n",usa, RegFile[usa]);
                   udata2 = RegFile[usa];
                   if(urt == 0 && urd == 0 && usa == 0){
                     printf("NOP\n");
@@ -452,6 +454,7 @@ int main(int argc, char * argv[]) {
                   rd = CurrentInstruction & 0xF800; /*masks off rd*/
                   rd = rd >> 11;
                   int32_t sa = CurrentInstruction & 0x7C0; /*masks off sa*/
+                  sa = sa >> 6;
                   data2 = RegFile[sa];
                   temp = data1 >> data2;
                   printf("temp: %i\n",temp);
@@ -487,6 +490,7 @@ int main(int argc, char * argv[]) {
                   urd = CurrentInstruction & 0xF800; /*masks off rd*/
                   urd = urd >> 11;
                   usa = CurrentInstruction & 0x7C0; /*masks off sa*/
+                  usa = usa >> 6;
                   udata2 = RegFile[usa];
                   utemp = udata1 >> udata2;
                   printf("temp: %i\n",utemp);
@@ -615,13 +619,12 @@ int main(int argc, char * argv[]) {
               printf("rs: %04x\n",rs);
               rt = CurrentInstruction & 0x1F0000; /*masks off rt*/
               rt = rt >> 16;
-              printf("rt: %04x\n",rt);
               immediate = CurrentInstruction & 0xFFFF;
               printf("immediate: %04x\n",immediate);
               temp = RegFile[rs] ^ immediate;
               printf("temp: %04x\n",temp);
               RegFile[rt] = temp;
-              printf("rt: %04x\n",RegFile[rt]);
+              printf("rt %i: %i\n",rt,RegFile[rt]);
           break;
 
           case 0xA:/*slti - Jeter*/
@@ -1032,7 +1035,7 @@ int main(int argc, char * argv[]) {
               writeWord((RegFile[base] + target_offset),(udata1 | (RegFile[base] + target_offset)),0);
           break;
       }
-    //printRegFile();
+    printRegFile();
     PC = PC + 4;
     }
 }
